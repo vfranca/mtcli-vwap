@@ -27,7 +27,15 @@ from .conf import (
     show_default=True,
     help="Numero de timeframes da VWAP.",
 )
-def vwap(symbol, minutes, limit):
+@click.option(
+    "--verbose",
+    "-vv",
+    is_flag=True,
+    default=False,
+    show_default=True,
+    help="Modo verboso.",
+)
+def vwap(symbol, minutes, limit, verbose):
     """Calcula o VWAP do ativo SYMBOL no intraday."""
     resultado = obter_vwap(symbol, minutes, limit)
-    exibir_vwap(resultado, symbol)
+    exibir_vwap(resultado, symbol, verbose)

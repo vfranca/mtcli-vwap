@@ -1,6 +1,6 @@
 [project]
 name = "mtcli-vwap"
-version = "1.0.0"
+version = "1.0.1"
 description = "Plugin mtcli da VWAP"
 authors = [
     {name = "Valmir França da Silva",email = "vfranca3@gmail.com"}
