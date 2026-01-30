@@ -1,6 +1,16 @@
-# ============================
-# mtcli_vwap/model.py
-# ============================
+"""
+Módulo de cálculo da VWAP (Volume Weighted Average Price) para uso com MetaTrader 5.
+
+Este módulo suporta:
+- VWAP ancorada na abertura do pregão
+- VWAP ancorada por horário específico
+- VWAP ancorada na máxima ou mínima do período
+- Bandas de desvio padrão ponderadas por volume (modelo profissional)
+
+Indicado para uso em análise intraday de índice e dólar,
+em conjunto com Volume Profile, tape reading e price action.
+"""
+
 import MetaTrader5 as mt5
 import pandas as pd
 from datetime import datetime, timedelta
@@ -21,8 +31,16 @@ def calcular_vwap(
     """
     Calcula a VWAP (Volume Weighted Average Price) a partir dos dados do MT5.
 
-    Suporta VWAP ancorada e bandas de desvio padrão.
-
+    :param symbol: Ativo (ex: WIN$, WDO$, WING26)
+    :param minutes: Timeframe em minutos
+    :param limit: Quantidade de candles
+    :param anchor_type: Tipo de ancoragem
+        - "abertura": início do pregão
+        - "hora": horário específico
+        - "maxima": a partir da máxima do período
+        - "minima": a partir da mínima do período
+    :param anchor_time: datetime usado quando anchor_type="hora"
+    :param bandas: Quantidade de bandas de desvio padrão
     :return: dict com resultado estruturado ou None
     """
     with mt5_conexao():
@@ -41,29 +59,58 @@ def calcular_vwap(
     df = pd.DataFrame(rates)
     df["datetime"] = pd.to_datetime(df["time"], unit="s")
 
-    # Ancoragem
-    if anchor_type == "hora" and anchor_time:
+    # =========================
+    # ANCORAGEM
+    # =========================
+    if anchor_type == "abertura":
+        data_pregao = df["datetime"].dt.date.max()
+        df = df[df["datetime"].dt.date == data_pregao]
+
+    elif anchor_type == "hora" and anchor_time:
         df = df[df["datetime"] >= anchor_time]
 
-    # Preço típico e VWAP
+    elif anchor_type == "maxima":
+        idx = df["high"].idxmax()
+        df = df.loc[idx:]
+
+    elif anchor_type == "minima":
+        idx = df["low"].idxmin()
+        df = df.loc[idx:]
+
+    if df.empty:
+        log.warning("DataFrame vazio após ancoragem")
+        return None
+
+    # =========================
+    # CÁLCULO DA VWAP
+    # =========================
     df["tp"] = (df["high"] + df["low"] + df["close"]) / 3
     df["pv"] = df["tp"] * df["real_volume"]
-    df["vwap"] = df["pv"].cumsum() / df["real_volume"].cumsum()
+
+    volume_acumulado = df["real_volume"].cumsum()
+    pv_acumulado = df["pv"].cumsum()
+
+    df["vwap"] = pv_acumulado / volume_acumulado
+
+    vwap_final = float(df["vwap"].iloc[-1])
 
     resultado = {
-        "vwap": float(df["vwap"].iloc[-1]),
+        "vwap": vwap_final,
         "anchor_type": anchor_type,
         "anchor_time": anchor_time.isoformat() if anchor_time else None,
     }
 
-    # Bandas de desvio padrão
+    # =========================
+    # BANDAS POR DESVIO DE VOLUME
+    # =========================
     if bandas > 0:
-        df["desvio"] = (df["tp"] - df["vwap"]) ** 2
-        df["std"] = (df["desvio"].cumsum() / (df.index + 1)).pow(0.5)
+        df["desvio_vol"] = ((df["tp"] - df["vwap"]) ** 2) * df["real_volume"]
+        variancia = df["desvio_vol"].sum() / volume_acumulado.iloc[-1]
+        std_vwap = variancia ** 0.5
 
         for i in range(1, bandas + 1):
-            resultado[f"banda_sup_{i}"] = float(df["vwap"].iloc[-1] + i * df["std"].iloc[-1])
-            resultado[f"banda_inf_{i}"] = float(df["vwap"].iloc[-1] - i * df["std"].iloc[-1])
+            resultado[f"banda_sup_{i}"] = vwap_final + i * std_vwap
+            resultado[f"banda_inf_{i}"] = vwap_final - i * std_vwap
 
     return resultado
 

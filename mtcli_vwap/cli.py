@@ -1,13 +1,10 @@
-# ============================
-# mtcli_vwap/cli.py
-# ============================
 import json
 from datetime import datetime
 import click
 
 from .controller import obter_vwap
 from .view import exibir_vwap
-from .conf import SYMBOL, MINUTES, LIMIT
+from .conf import SYMBOL, MINUTES, LIMIT, ANCHOR, BANDS
 
 
 @click.command()
@@ -29,19 +26,22 @@ from .conf import SYMBOL, MINUTES, LIMIT
 )
 @click.option(
     "--anchor",
+    "-a",
     type=click.Choice(["abertura", "ajuste", "hora"]),
-    default="abertura",
+    default=ANCHOR,
     show_default=True,
     help="Tipo de ancoragem da VWAP.",
 )
 @click.option(
     "--anchor-time",
+    "-at",
     default=None,
     help="Horário de ancoragem (YYYY-MM-DD HH:MM). Usado com anchor=hora.",
 )
 @click.option(
     "--bands",
-    default=0,
+    "-b",
+    default=BANDS,
     show_default=True,
     help="Número de bandas de desvio padrão.",
 )

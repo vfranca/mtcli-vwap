@@ -1,6 +1,3 @@
-# ============================
-# mtcli_vwap/controller.py
-# ============================
 from datetime import datetime
 from .model import calcular_vwap
 
