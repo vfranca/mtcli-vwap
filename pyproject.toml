@@ -9,7 +9,6 @@ readme = "README.md"
 license = "MIT"
 requires-python = ">=3.10,<3.14"
 
-
 keywords = [
     "trading",
     "vwap",
@@ -22,7 +21,7 @@ keywords = [
 ]
 
 classifiers = [
-    "Development Status :: 5 - Product/Stable",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Financial and Insurance Industry",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
