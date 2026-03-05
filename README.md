@@ -169,7 +169,7 @@ mtcli_vwap/
 
 ## Licença
 
-GPL
+MIT
 
 ---
 

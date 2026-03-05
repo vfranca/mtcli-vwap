@@ -1,22 +1,47 @@
 [project]
 name = "mtcli-vwap"
-version = "2.0.0"
+version = "2.0.1"
 description = "Plugin mtcli da VWAP"
 authors = [
     {name = "Valmir França da Silva",email = "vfranca3@gmail.com"}
 ]
 readme = "README.md"
-license = "GPL-3.0"
+license = "MIT"
 requires-python = ">=3.10,<3.14"
+
+
+keywords = [
+    "trading",
+    "vwap",
+    "volume",
+    "metatrader5",
+    "mt5",
+    "cli",
+    "acessibilidade",
+    "screen reader friendly"
+]
+
+classifiers = [
+    "Development Status :: 5 - Product/Stable",
+    "Intended Audience :: Financial and Insurance Industry",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Operating System :: OS Independent",
+    "Topic :: Office/Business :: Financial :: Investment",
+]
+
 dependencies = [
-    "mtcli>=1.18.1",
+    "mtcli>=3.7.0",
     "pandas (>=2.3.3,<3.0.0)",
     "click (>=8.3.1,<9.0.0)",
     "metatrader5 (>=5.0.5430,<6.0.0)"
 ]
 
 [project.entry-points."mtcli.plugins"]
-mtcli_vwap = "mtcli_vwap.plugin:register"
+mtcli-vwap = "mtcli_vwap.plugin:register"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
